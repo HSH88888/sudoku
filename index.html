@@ -7,54 +7,123 @@
     <title>스도쿠 게임</title>
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        :root {
+            --primary-color: #f0f0f0;
+            --secondary-color: #333;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --info-color: #3498db;
+            --shadow-light: -8px -8px 15px rgba(255, 255, 255, 1);
+            --shadow-dark: 8px 8px 15px rgba(0, 0, 0, 0.1);
+            --active-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.1), inset -5px -5px 10px rgba(255, 255, 255, 0.5);
+            --cell-bg: #f5f5f5;
+            --cell-fixed-bg: #e8e8e8;
+            --cell-selected: #d4e6f1;
+            --cell-highlighted: #e8f6f3;
+            --cell-error: #fadbd8;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            background: var(--primary-color);
+            transition: 0.5s;
             padding: 20px;
         }
 
+        body.dark {
+            --primary-color: #2c2c2c;
+            --secondary-color: #fff;
+            --shadow-light: -5px -5px 10px rgba(255, 255, 255, 0.05);
+            --shadow-dark: 5px 5px 15px rgba(0, 0, 0, 0.5);
+            --active-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.3), inset -5px -5px 10px rgba(255, 255, 255, 0.05);
+            --cell-bg: #3a3a3a;
+            --cell-fixed-bg: #4a4a4a;
+            --cell-selected: #2c5282;
+            --cell-highlighted: #2d3748;
+            --cell-error: #742a2a;
+        }
+
         .container {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            padding: 30px;
-            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
             max-width: 500px;
             width: 100%;
         }
 
         h1 {
+            font-size: 2.2rem;
+            color: var(--secondary-color);
             text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 2.5em;
         }
 
+        /* 다크 모드 토글 */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        /* 뉴모픽 버튼 */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 15px;
+            background: var(--primary-color);
+            color: var(--secondary-color);
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-light), var(--shadow-dark);
+            transition: all 0.2s;
+            border: none;
+            font-size: 0.95rem;
+            user-select: none;
+        }
+
+        .btn:active,
+        .btn.active-state {
+            box-shadow: var(--active-shadow);
+            transform: scale(0.98);
+        }
+
+        .btn-accent {
+            color: var(--accent-color);
+        }
+
+        .btn-success {
+            color: var(--success-color);
+        }
+
+        .btn-info {
+            color: var(--info-color);
+        }
+
+        /* 게임 정보 */
         .game-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            flex-wrap: wrap;
-            gap: 10px;
+            width: 100%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            background: var(--primary-color);
+            box-shadow: var(--shadow-light), var(--shadow-dark);
         }
 
         .timer {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #495057;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--secondary-color);
         }
 
         .difficulty {
@@ -62,34 +131,25 @@
             gap: 8px;
         }
 
-        .difficulty button {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 5px;
-            background-color: #6c757d;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.85em;
+        .difficulty .btn {
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            border-radius: 12px;
         }
 
-        .difficulty button:hover {
-            background-color: #5a6268;
+        .difficulty .btn.active-state {
+            color: var(--accent-color);
         }
 
-        .difficulty button.active {
-            background-color: #007bff;
-        }
-
+        /* 스도쿠 보드 - 뉴모픽 스타일 */
         .sudoku-board {
             display: grid;
             grid-template-columns: repeat(9, 1fr);
-            gap: 1px;
-            background-color: #333;
-            border: 3px solid #333;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 20px;
+            gap: 3px;
+            padding: 15px;
+            border-radius: 25px;
+            background: var(--primary-color);
+            box-shadow: var(--shadow-light), var(--shadow-dark);
         }
 
         .cell {
@@ -97,217 +157,180 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: white;
-            font-size: 1.4em;
-            font-weight: bold;
+            background: var(--cell-bg);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--secondary-color);
             cursor: pointer;
+            border-radius: 8px;
             transition: all 0.15s;
+            box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.05),
+                inset -2px -2px 4px rgba(255, 255, 255, 0.5);
             user-select: none;
         }
 
+        body.dark .cell {
+            box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.2),
+                inset -2px -2px 4px rgba(255, 255, 255, 0.02);
+        }
+
         .cell:hover {
-            background-color: #e3f2fd;
+            background: var(--cell-highlighted);
         }
 
         .cell.fixed {
-            background-color: #f8f9fa;
-            color: #333;
+            background: var(--cell-fixed-bg);
             cursor: default;
         }
 
         .cell.user-input {
-            color: #1976d2;
+            color: var(--info-color);
         }
 
         .cell.selected {
-            background-color: #bbdefb !important;
-            box-shadow: inset 0 0 0 2px #1976d2;
+            background: var(--cell-selected);
+            box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.15),
+                inset -3px -3px 6px rgba(255, 255, 255, 0.3);
         }
 
         .cell.highlighted {
-            background-color: #e8f5e9;
+            background: var(--cell-highlighted);
         }
 
         .cell.error {
-            color: #d32f2f;
-            background-color: #ffebee;
+            color: var(--accent-color);
+            background: var(--cell-error);
         }
 
+        /* 3x3 박스 구분선 */
         .cell:nth-child(3n):not(:nth-child(9n)) {
-            border-right: 2px solid #333;
+            margin-right: 4px;
         }
 
         .cell:nth-child(n+19):nth-child(-n+27),
         .cell:nth-child(n+46):nth-child(-n+54) {
-            border-bottom: 2px solid #333;
+            margin-bottom: 4px;
         }
 
+        /* 컨트롤 */
         .controls {
             display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
             flex-wrap: wrap;
+            justify-content: center;
         }
 
-        button {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.9em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-new-game {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .btn-new-game:hover {
-            background-color: #218838;
-        }
-
-        .btn-check {
-            background-color: #ffc107;
-            color: #212529;
-        }
-
-        .btn-check:hover {
-            background-color: #e0a800;
-        }
-
-        .btn-hint {
-            background-color: #6f42c1;
-            color: white;
-        }
-
-        .btn-hint:hover {
-            background-color: #5a32a3;
-        }
-
-        .btn-solve {
-            background-color: #17a2b8;
-            color: white;
-        }
-
-        .btn-solve:hover {
-            background-color: #138496;
-        }
-
+        /* 숫자 패드 */
         .number-pad {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
+            gap: 10px;
+            width: 100%;
+            padding: 15px;
+            border-radius: 20px;
+            background: var(--primary-color);
+            box-shadow: var(--shadow-light), var(--shadow-dark);
         }
 
-        .number-pad button {
-            padding: 12px;
-            background-color: #495057;
-            color: white;
-            font-size: 1.1em;
-            border-radius: 8px;
+        .number-pad .btn {
+            padding: 15px;
+            font-size: 1.2rem;
+            border-radius: 12px;
         }
 
-        .number-pad button:hover {
-            background-color: #343a40;
-        }
-
-        .number-pad button:nth-child(10) {
+        .number-pad .btn:nth-child(10) {
             grid-column: span 2;
-            background-color: #dc3545;
+            color: var(--accent-color);
         }
 
-        .number-pad button:nth-child(10):hover {
-            background-color: #c82333;
+        /* 힌트 & 메시지 */
+        .hint-count {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            opacity: 0.7;
         }
 
         .message {
             text-align: center;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-weight: bold;
-            transition: all 0.3s;
+            padding: 12px 20px;
+            border-radius: 15px;
+            font-weight: 600;
+            background: var(--primary-color);
+            box-shadow: var(--shadow-light), var(--shadow-dark);
+            color: var(--secondary-color);
+            min-height: 20px;
         }
 
-        .success {
-            background-color: #d4edda;
-            color: #155724;
+        .message.success {
+            color: var(--success-color);
         }
 
-        .error-message {
-            background-color: #f8d7da;
-            color: #721c24;
+        .message.error-message {
+            color: var(--accent-color);
         }
 
-        .info {
-            background-color: #cce5ff;
-            color: #004085;
-        }
-
-        .hint-count {
-            font-size: 0.8em;
-            color: #6c757d;
-            text-align: center;
-            margin-top: 10px;
+        .message.info {
+            color: var(--info-color);
         }
 
         @media (max-width: 500px) {
-            .container {
-                padding: 15px;
-            }
-
             h1 {
-                font-size: 1.8em;
+                font-size: 1.8rem;
             }
 
             .cell {
-                font-size: 1.1em;
+                font-size: 1.1rem;
             }
 
-            .difficulty button {
-                padding: 6px 10px;
-                font-size: 0.75em;
+            .game-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .number-pad .btn {
+                padding: 12px;
+                font-size: 1rem;
             }
         }
     </style>
 </head>
 
-<body>
+<body class="dark">
+
+    <button class="btn dark-mode-toggle" id="btnDarkMode">☀️ Light</button>
+
     <div class="container">
         <h1>🧩 스도쿠</h1>
 
         <div class="game-info">
             <div class="timer">⏱️ <span id="time">00:00</span></div>
             <div class="difficulty">
-                <button class="active" data-difficulty="easy">쉬움</button>
-                <button data-difficulty="medium">보통</button>
-                <button data-difficulty="hard">어려움</button>
+                <button class="btn active-state" data-difficulty="easy">쉬움</button>
+                <button class="btn" data-difficulty="medium">보통</button>
+                <button class="btn" data-difficulty="hard">어려움</button>
             </div>
         </div>
 
         <div class="sudoku-board" id="board"></div>
 
         <div class="controls">
-            <button class="btn-new-game" id="new-game">🔄 새 게임</button>
-            <button class="btn-hint" id="hint">💡 힌트</button>
-            <button class="btn-check" id="check">✅ 검사</button>
-            <button class="btn-solve" id="solve">🎯 정답</button>
+            <button class="btn btn-success" id="new-game">🔄 새 게임</button>
+            <button class="btn btn-info" id="hint">💡 힌트</button>
+            <button class="btn" id="check">✅ 검사</button>
+            <button class="btn btn-accent" id="solve">🎯 정답</button>
         </div>
 
         <div class="number-pad" id="number-pad">
-            <button data-number="1">1</button>
-            <button data-number="2">2</button>
-            <button data-number="3">3</button>
-            <button data-number="4">4</button>
-            <button data-number="5">5</button>
-            <button data-number="6">6</button>
-            <button data-number="7">7</button>
-            <button data-number="8">8</button>
-            <button data-number="9">9</button>
-            <button data-number="0">⌫ 지우기</button>
+            <button class="btn" data-number="1">1</button>
+            <button class="btn" data-number="2">2</button>
+            <button class="btn" data-number="3">3</button>
+            <button class="btn" data-number="4">4</button>
+            <button class="btn" data-number="5">5</button>
+            <button class="btn" data-number="6">6</button>
+            <button class="btn" data-number="7">7</button>
+            <button class="btn" data-number="8">8</button>
+            <button class="btn" data-number="9">9</button>
+            <button class="btn" data-number="0">⌫ 지우기</button>
         </div>
 
         <div class="hint-count" id="hint-count">힌트: 3/3</div>
@@ -315,6 +338,22 @@
     </div>
 
     <script>
+        // 다크 모드
+        const body = document.body;
+        const btnDarkMode = document.getElementById('btnDarkMode');
+
+        if (localStorage.getItem('sudoku-theme') === 'dark') {
+            body.classList.add('dark');
+            btnDarkMode.textContent = '☀️ Light';
+        }
+
+        btnDarkMode.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            const isDark = body.classList.contains('dark');
+            btnDarkMode.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+            localStorage.setItem('sudoku-theme', isDark ? 'dark' : 'light');
+        });
+
         class SudokuGame {
             constructor() {
                 this.board = [];
@@ -341,15 +380,15 @@
                 this.checkButton = document.getElementById('check');
                 this.solveButton = document.getElementById('solve');
                 this.hintButton = document.getElementById('hint');
-                this.numberButtons = document.querySelectorAll('.number-pad button');
-                this.difficultyButtons = document.querySelectorAll('.difficulty button');
+                this.numberButtons = document.querySelectorAll('.number-pad .btn');
+                this.difficultyButtons = document.querySelectorAll('.difficulty .btn');
             }
 
             bindEvents() {
                 this.difficultyButtons.forEach(button => {
                     button.addEventListener('click', () => {
-                        this.difficultyButtons.forEach(btn => btn.classList.remove('active'));
-                        button.classList.add('active');
+                        this.difficultyButtons.forEach(btn => btn.classList.remove('active-state'));
+                        button.classList.add('active-state');
                         this.difficulty = button.dataset.difficulty;
                         this.startNewGame();
                     });
@@ -363,31 +402,19 @@
                 this.numberButtons.forEach(button => {
                     button.addEventListener('click', () => {
                         const number = parseInt(button.dataset.number);
-                        if (number === 0) {
-                            this.clearCell();
-                        } else {
-                            this.setNumber(number);
-                        }
+                        if (number === 0) this.clearCell();
+                        else this.setNumber(number);
                     });
                 });
 
-                // 키보드 입력 지원
                 document.addEventListener('keydown', (e) => {
                     if (!this.isGameActive) return;
-
-                    if (e.key >= '1' && e.key <= '9') {
-                        this.setNumber(parseInt(e.key));
-                    } else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') {
-                        this.clearCell();
-                    } else if (e.key === 'ArrowUp' && this.selectedCell) {
-                        this.moveSelection(-1, 0);
-                    } else if (e.key === 'ArrowDown' && this.selectedCell) {
-                        this.moveSelection(1, 0);
-                    } else if (e.key === 'ArrowLeft' && this.selectedCell) {
-                        this.moveSelection(0, -1);
-                    } else if (e.key === 'ArrowRight' && this.selectedCell) {
-                        this.moveSelection(0, 1);
-                    }
+                    if (e.key >= '1' && e.key <= '9') this.setNumber(parseInt(e.key));
+                    else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') this.clearCell();
+                    else if (e.key === 'ArrowUp' && this.selectedCell) this.moveSelection(-1, 0);
+                    else if (e.key === 'ArrowDown' && this.selectedCell) this.moveSelection(1, 0);
+                    else if (e.key === 'ArrowLeft' && this.selectedCell) this.moveSelection(0, -1);
+                    else if (e.key === 'ArrowRight' && this.selectedCell) this.moveSelection(0, 1);
                 });
             }
 
@@ -407,15 +434,12 @@
                 this.generateSudoku();
                 this.renderBoard();
                 this.isGameActive = true;
-                this.startTimer(); // 타이머 시작!
-                this.showMessage('새 게임이 시작되었습니다!', 'success');
+                this.startTimer();
+                this.showMessage('새 게임 시작! 🎮', 'success');
             }
 
             generateSudoku() {
-                // 완성된 스도쿠 생성
                 this.solution = this.generateFullBoard();
-
-                // 난이도에 따라 셀 제거
                 const removeCount = { easy: 35, medium: 45, hard: 55 };
                 const toRemove = removeCount[this.difficulty];
 
@@ -434,7 +458,6 @@
                 }
             }
 
-            // 완성된 스도쿠 보드 생성
             generateFullBoard() {
                 const board = Array(9).fill().map(() => Array(9).fill(0));
                 this.fillBoard(board);
@@ -444,10 +467,8 @@
             fillBoard(board) {
                 const empty = this.findEmpty(board);
                 if (!empty) return true;
-
                 const [row, col] = empty;
                 const numbers = this.shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-
                 for (const num of numbers) {
                     if (this.isValidPlacement(board, row, col, num)) {
                         board[row][col] = num;
@@ -476,15 +497,8 @@
             }
 
             isValidPlacement(board, row, col, num) {
-                // 행 체크
                 if (board[row].includes(num)) return false;
-
-                // 열 체크
-                for (let i = 0; i < 9; i++) {
-                    if (board[i][col] === num) return false;
-                }
-
-                // 3x3 박스 체크
+                for (let i = 0; i < 9; i++) if (board[i][col] === num) return false;
                 const boxRow = Math.floor(row / 3) * 3;
                 const boxCol = Math.floor(col / 3) * 3;
                 for (let i = boxRow; i < boxRow + 3; i++) {
@@ -495,57 +509,28 @@
                 return true;
             }
 
-            // 백트래킹 스도쿠 풀이 알고리즘
-            solveSudokuBoard(board) {
-                const empty = this.findEmpty(board);
-                if (!empty) return true;
-
-                const [row, col] = empty;
-                for (let num = 1; num <= 9; num++) {
-                    if (this.isValidPlacement(board, row, col, num)) {
-                        board[row][col] = num;
-                        if (this.solveSudokuBoard(board)) return true;
-                        board[row][col] = 0;
-                    }
-                }
-                return false;
-            }
-
             renderBoard() {
                 this.boardElement.innerHTML = '';
-
                 for (let i = 0; i < 9; i++) {
                     for (let j = 0; j < 9; j++) {
                         const cell = document.createElement('div');
                         cell.className = 'cell';
                         cell.dataset.row = i;
                         cell.dataset.col = j;
-
                         if (this.board[i][j] !== 0) {
                             cell.textContent = this.board[i][j];
-                            if (this.originalBoard[i][j] !== 0) {
-                                cell.classList.add('fixed');
-                            } else {
-                                cell.classList.add('user-input');
-                            }
+                            if (this.originalBoard[i][j] !== 0) cell.classList.add('fixed');
+                            else cell.classList.add('user-input');
                         }
-
                         cell.addEventListener('click', () => this.selectCell(i, j));
                         this.boardElement.appendChild(cell);
                     }
                 }
-
-                if (this.selectedCell) {
-                    this.highlightRelated(this.selectedCell.row, this.selectedCell.col);
-                }
+                if (this.selectedCell) this.highlightRelated(this.selectedCell.row, this.selectedCell.col);
             }
 
             selectCell(row, col) {
-                const cells = document.querySelectorAll('.cell');
-                cells.forEach(cell => {
-                    cell.classList.remove('selected', 'highlighted');
-                });
-
+                document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected', 'highlighted'));
                 const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
                 if (cell) {
                     cell.classList.add('selected');
@@ -555,18 +540,13 @@
             }
 
             highlightRelated(row, col) {
-                const cells = document.querySelectorAll('.cell');
-                cells.forEach(cell => {
+                document.querySelectorAll('.cell').forEach(cell => {
                     const r = parseInt(cell.dataset.row);
                     const c = parseInt(cell.dataset.col);
                     const boxRow = Math.floor(row / 3) * 3;
                     const boxCol = Math.floor(col / 3) * 3;
-
-                    if (r === row || c === col ||
-                        (r >= boxRow && r < boxRow + 3 && c >= boxCol && c < boxCol + 3)) {
-                        if (r !== row || c !== col) {
-                            cell.classList.add('highlighted');
-                        }
+                    if ((r === row || c === col || (r >= boxRow && r < boxRow + 3 && c >= boxCol && c < boxCol + 3)) && (r !== row || c !== col)) {
+                        cell.classList.add('highlighted');
                     }
                 });
             }
@@ -598,29 +578,23 @@
                     this.showMessage('힌트를 모두 사용했습니다!', 'error-message');
                     return;
                 }
-
-                // 빈 셀 찾기
                 const emptyCells = [];
                 for (let i = 0; i < 9; i++) {
                     for (let j = 0; j < 9; j++) {
-                        if (this.board[i][j] === 0) {
-                            emptyCells.push({ row: i, col: j });
-                        }
+                        if (this.board[i][j] === 0) emptyCells.push({ row: i, col: j });
                     }
                 }
-
                 if (emptyCells.length === 0) {
                     this.showMessage('모든 셀이 채워졌습니다!', 'info');
                     return;
                 }
-
                 const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
                 this.board[randomCell.row][randomCell.col] = this.solution[randomCell.row][randomCell.col];
                 this.hintsRemaining--;
                 this.updateHintCount();
                 this.renderBoard();
                 this.selectCell(randomCell.row, randomCell.col);
-                this.showMessage('힌트가 적용되었습니다!', 'info');
+                this.showMessage('힌트 적용! 💡', 'info');
                 this.checkWin();
             }
 
@@ -629,14 +603,11 @@
             }
 
             checkForErrors() {
-                const cells = document.querySelectorAll('.cell');
-                cells.forEach(cell => cell.classList.remove('error'));
-
+                document.querySelectorAll('.cell').forEach(c => c.classList.remove('error'));
                 for (let i = 0; i < 9; i++) {
                     for (let j = 0; j < 9; j++) {
                         const value = this.board[i][j];
                         if (value !== 0) {
-                            // 행, 열, 박스 중복 체크
                             for (let k = 0; k < 9; k++) {
                                 if (k !== j && this.board[i][k] === value) this.markCellError(i, j);
                                 if (k !== i && this.board[k][j] === value) this.markCellError(i, j);
@@ -645,9 +616,7 @@
                             const boxCol = Math.floor(j / 3) * 3;
                             for (let r = boxRow; r < boxRow + 3; r++) {
                                 for (let c = boxCol; c < boxCol + 3; c++) {
-                                    if ((r !== i || c !== j) && this.board[r][c] === value) {
-                                        this.markCellError(i, j);
-                                    }
+                                    if ((r !== i || c !== j) && this.board[r][c] === value) this.markCellError(i, j);
                                 }
                             }
                         }
@@ -681,11 +650,7 @@
                         }
                     }
                 }
-                if (errors === 0) {
-                    this.showMessage('현재까지 오류 없음! 👍', 'success');
-                } else {
-                    this.showMessage(`${errors}개의 오류가 있습니다.`, 'error-message');
-                }
+                this.showMessage(errors === 0 ? '오류 없음! 👍' : `${errors}개 오류`, errors === 0 ? 'success' : 'error-message');
             }
 
             solvePuzzle() {
@@ -693,7 +658,7 @@
                 this.renderBoard();
                 this.isGameActive = false;
                 this.clearTimer();
-                this.showMessage('정답이 표시되었습니다!', 'info');
+                this.showMessage('정답 표시 🎯', 'info');
             }
 
             updateTime() {
@@ -703,26 +668,17 @@
             }
 
             startTimer() {
-                this.timer = setInterval(() => {
-                    this.seconds++;
-                    this.updateTime();
-                }, 1000);
+                this.timer = setInterval(() => { this.seconds++; this.updateTime(); }, 1000);
             }
 
             clearTimer() {
-                if (this.timer) {
-                    clearInterval(this.timer);
-                    this.timer = null;
-                }
+                if (this.timer) { clearInterval(this.timer); this.timer = null; }
             }
 
             showMessage(text, type) {
                 this.messageElement.textContent = text;
                 this.messageElement.className = 'message ' + type;
-                setTimeout(() => {
-                    this.messageElement.textContent = '';
-                    this.messageElement.className = 'message';
-                }, 3000);
+                setTimeout(() => { this.messageElement.textContent = ''; this.messageElement.className = 'message'; }, 3000);
             }
         }
 
